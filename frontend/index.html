@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirigiendo...</title>
+  <script src="js/common/api-client.js"></script>
+  <script>
+    (async () => {
+      try {
+        const data = await apiGet('/auth/me');
+        window.location.href = data?.user ? '/pages/dashboard.html' : '/pages/login.html';
+      } catch {
+        window.location.href = '/pages/login.html';
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>

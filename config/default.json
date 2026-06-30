@@ -1,0 +1,17 @@
+{
+  "port": 3000,
+  "dbDriver": "sqlite",
+  "sqlitePath": "./data/idcard.sqlite3",
+  "mdbPath": "../base/DPSL_2024.MDB",
+  "mdbTableName": "DPSL_2024",
+  "photosBaseDir": "./uploads/photos",
+  "signaturesBaseDir": "./uploads/signatures",
+  "photosAbsoluteBasePath": "",
+  "jwtExpiresIn": "8h",
+  "cookieMaxAgeMs": 28800000,
+  "corsOrigins": ["http://localhost:3000"],
+  "isHttps": false,
+  "sameSitePolicy": "lax",
+  "uploadMaxSizeBytes": 5242880,
+  "logLevel": "info"
+}

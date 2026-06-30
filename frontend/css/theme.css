@@ -1,0 +1,8 @@
+:root {
+  --brand-primary: #0d6efd;
+  --brand-dark: #0a2540;
+}
+
+.navbar.bg-brand {
+  background-color: var(--brand-dark) !important;
+}

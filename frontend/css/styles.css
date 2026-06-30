@@ -1,0 +1,46 @@
+body {
+  background-color: #f4f6f9;
+}
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+.card-stat {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.card-stat .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.webcam-video, .webcam-canvas {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 0.5rem;
+  background: #000;
+}
+
+.photo-preview {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.login-card {
+  max-width: 400px;
+  margin: 80px auto;
+}
+
+.estado-badge.Pendiente { background-color: #ffc107; }
+.estado-badge.Impreso { background-color: #198754; }
+.estado-badge.Cancelado { background-color: #dc3545; }
+
+.table-actions a, .table-actions button {
+  margin-right: 0.25rem;
+}

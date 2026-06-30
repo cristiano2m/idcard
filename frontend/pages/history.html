@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial - Credenciales PVC</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../css/theme.css" rel="stylesheet">
+  <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body>
+  <div id="app-navbar"></div>
+
+  <div class="container pb-5">
+    <h3 class="mb-3">Historial de actividad</h3>
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-3">
+            <select class="form-select" id="f-accion">
+              <option value="">Todas las acciones</option>
+              <option value="LOGIN">Login</option>
+              <option value="CREATE_PERSON">Creación de persona</option>
+              <option value="UPDATE_PERSON">Edición de persona</option>
+              <option value="CHANGE_STATUS">Cambio de estado</option>
+              <option value="DELETE_PERSON">Eliminación</option>
+            </select>
+          </div>
+          <div class="col-md-3"><input type="date" class="form-control" id="f-desde" placeholder="Desde"></div>
+          <div class="col-md-3"><input type="date" class="form-control" id="f-hasta" placeholder="Hasta"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Estado resultante</th><th>IP</th></tr></thead>
+          <tbody id="history-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/common/api-client.js"></script>
+  <script src="../js/common/auth-guard.js"></script>
+  <script src="../js/common/navbar.js"></script>
+  <script src="../js/common/toast.js"></script>
+  <script src="../js/common/utils.js"></script>
+  <script src="../js/history.js"></script>
+</body>
+</html>
