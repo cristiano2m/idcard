@@ -58,6 +58,11 @@ router.post('/active', ...adminOnly,
  *     tags: [Mdb]
  *     security: [{ cookieAuth: [] }]
  */
+router.post('/password', ...adminOnly,
+  [body('password')],
+  ctrl.updatePassword
+);
+
 router.post('/import', ...adminOnly, ctrl.importData);
 
 /** @swagger

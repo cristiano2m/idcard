@@ -78,6 +78,38 @@
           </div>
         </div>
 
+        <hr class="my-3">
+
+        <!-- Contraseña de la base de datos -->
+        <h6 class="fw-semibold">3. Contraseña de la base de datos (si aplica)</h6>
+        <p class="text-muted small">
+          Si el archivo <code>.mdb</code> tiene contraseña de apertura, ingrésala aquí.
+          Se guarda de forma segura en el servidor y nunca se muestra en pantalla.
+        </p>
+        <div class="row g-2 align-items-end mb-2">
+          <div class="col-md-6">
+            <label class="form-label">Contraseña del archivo .mdb</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="mdb-password" placeholder="Dejar vacío si no tiene contraseña">
+              <button class="btn btn-outline-secondary" type="button" id="btn-toggle-password" title="Mostrar/ocultar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.144 13.144 0 0 1 1.172 8z"/>
+                  <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="form-text" id="mdb-password-status"></div>
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-outline-primary w-100" id="btn-save-password">Guardar contraseña</button>
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-outline-danger w-100" id="btn-clear-password">Borrar contraseña</button>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
         <div id="mdb-active-info" class="alert alert-info small mb-0"></div>
         <div id="mdb-import-result" class="alert alert-success small mt-2 d-none"></div>
         <div class="mt-3">

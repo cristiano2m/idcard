@@ -1,4 +1,4 @@
-const { listAvailableMdbFiles, getActiveConnectionInfo, setActivePath, getSearchDir, setSearchDir } = require('../../infrastructure/database/mdb/MdbConfigService');
+const { listAvailableMdbFiles, getActiveConnectionInfo, setActivePath, getSearchDir, setSearchDir, setPassword } = require('../../infrastructure/database/mdb/MdbConfigService');
 const { importFromMdb } = require('../../application/use-cases/mdb/ImportFromMdb');
 const { listMdbRecords } = require('../../application/use-cases/mdb/ListMdbRecords');
 
@@ -53,4 +53,12 @@ async function records(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { listFiles, getActive, setActive, updateSearchDir, importData, records };
+async function updatePassword(req, res, next) {
+  try {
+    const { password } = req.body;
+    await setPassword(password || '');
+    res.json({ message: password ? 'Contraseña guardada' : 'Contraseña eliminada' });
+  } catch (err) { next(err); }
+}
+
+module.exports = { listFiles, getActive, setActive, updateSearchDir, updatePassword, importData, records };

@@ -20,13 +20,25 @@ async function setSearchDir(dir) {
   return resolved;
 }
 
+async function getPassword() {
+  const settings = getSettingsRepository();
+  return (await settings.get('mdb_password')) || '';
+}
+
+async function setPassword(password) {
+  const settings = getSettingsRepository();
+  await settings.set('mdb_password', password || '');
+}
+
 async function getActiveConnectionInfo() {
   const settings = getSettingsRepository();
   const activePath = await settings.get('mdb_active_path');
   const activeTable = await settings.get('mdb_active_table');
+  const password = await settings.get('mdb_password');
   return {
     mdbPath: activePath || config.mdbPath,
     tableName: activeTable || config.mdbTableName,
+    hasPassword: !!(password && password.length > 0),
   };
 }
 
@@ -61,4 +73,4 @@ async function listAvailableMdbFiles() {
     .filter(Boolean);
 }
 
-module.exports = { getActiveConnectionInfo, setActivePath, listAvailableMdbFiles, getSearchDir, setSearchDir, DEFAULT_SEARCH_DIR };
+module.exports = { getActiveConnectionInfo, setActivePath, listAvailableMdbFiles, getSearchDir, setSearchDir, getPassword, setPassword, DEFAULT_SEARCH_DIR };

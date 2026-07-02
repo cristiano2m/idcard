@@ -13,6 +13,10 @@ document.getElementById('btn-save-settings').addEventListener('click', async () 
 async function loadMdbFiles() {
   const { files, active, searchDir } = await apiGet('/mdb/files');
 
+  // Estado de contraseña
+  document.getElementById('mdb-password-status').textContent =
+    active.hasPassword ? 'Contraseña configurada: Sí' : 'Contraseña configurada: No';
+
   // Mostrar carpeta actual
   document.getElementById('mdb-search-dir').value = searchDir || '';
   document.getElementById('mdb-search-dir-current').textContent =
@@ -61,6 +65,32 @@ document.getElementById('btn-activate-direct').addEventListener('click', async (
     await apiPost('/mdb/active', { mdbPath });
     showSuccess('Base de datos activa actualizada');
     document.getElementById('mdb-direct-path').value = '';
+    await loadMdbFiles();
+  } catch (err) { showError(err.message); }
+});
+
+// Mostrar/ocultar contraseña
+document.getElementById('btn-toggle-password').addEventListener('click', () => {
+  const input = document.getElementById('mdb-password');
+  input.type = input.type === 'password' ? 'text' : 'password';
+});
+
+document.getElementById('btn-save-password').addEventListener('click', async () => {
+  const password = document.getElementById('mdb-password').value;
+  try {
+    await apiPost('/mdb/password', { password });
+    document.getElementById('mdb-password').value = '';
+    showSuccess(password ? 'Contraseña guardada' : 'Contraseña eliminada');
+    await loadMdbFiles();
+  } catch (err) { showError(err.message); }
+});
+
+document.getElementById('btn-clear-password').addEventListener('click', async () => {
+  if (!confirm('¿Borrar la contraseña guardada? La base solo será accesible si no tiene contraseña.')) return;
+  try {
+    await apiPost('/mdb/password', { password: '' });
+    document.getElementById('mdb-password').value = '';
+    showSuccess('Contraseña eliminada');
     await loadMdbFiles();
   } catch (err) { showError(err.message); }
 });
