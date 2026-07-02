@@ -223,6 +223,24 @@ if ($svcQuery -match "SERVICE_NAME") {
 & nssm set      $serviceName AppRotateOnline       1           | Out-Null
 & nssm set      $serviceName AppRotateSeconds      86400       | Out-Null
 
+# Cuenta del servicio — el proveedor ACE OLEDB (para archivos .mdb) requiere una
+# cuenta de usuario real; LocalSystem no tiene acceso al proveedor COM de 64 bits.
+Write-Host ""
+Write-Host "    El servicio necesita ejecutarse como un usuario de Windows (no LocalSystem)" -ForegroundColor White
+Write-Host "    para poder acceder a archivos .mdb via el driver ACE OLEDB." -ForegroundColor Gray
+Write-Host "    Deja en blanco para usar LocalSystem (el acceso MDB puede fallar)." -ForegroundColor Gray
+Write-Host ""
+$svcUser = Read-Host "    Usuario de Windows (Ej: .\Administrador  o  DOMINIO\usuario)"
+if ($svcUser) {
+    $svcPassSecure = Read-Host "    Contrasena de $svcUser" -AsSecureString
+    $svcPass = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+                [Runtime.InteropServices.Marshal]::SecureStringToBSTR($svcPassSecure))
+    & nssm set $serviceName ObjectName $svcUser $svcPass | Out-Null
+    Write-Ok "Servicio configurado para ejecutarse como: $svcUser"
+} else {
+    Write-Warn "Se usara LocalSystem. Si el MDB falla, cambia la cuenta en: nssm edit IDCardBackend"
+}
+
 Write-Host "    Iniciando servicio..." -ForegroundColor Gray
 & nssm start $serviceName | Out-Null
 Start-Sleep -Seconds 4
