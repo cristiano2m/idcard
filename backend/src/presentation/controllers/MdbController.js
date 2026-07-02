@@ -1,4 +1,4 @@
-const { listAvailableMdbFiles, getActiveConnectionInfo, setActivePath } = require('../../infrastructure/database/mdb/MdbConfigService');
+const { listAvailableMdbFiles, getActiveConnectionInfo, setActivePath, getSearchDir, setSearchDir } = require('../../infrastructure/database/mdb/MdbConfigService');
 const { importFromMdb } = require('../../application/use-cases/mdb/ImportFromMdb');
 const { listMdbRecords } = require('../../application/use-cases/mdb/ListMdbRecords');
 
@@ -8,9 +8,21 @@ function getContext(req) {
 
 async function listFiles(req, res, next) {
   try {
-    const files = listAvailableMdbFiles();
-    const active = await getActiveConnectionInfo();
-    res.json({ files, active });
+    const [files, active, searchDir] = await Promise.all([
+      listAvailableMdbFiles(),
+      getActiveConnectionInfo(),
+      getSearchDir(),
+    ]);
+    res.json({ files, active, searchDir });
+  } catch (err) { next(err); }
+}
+
+async function updateSearchDir(req, res, next) {
+  try {
+    const { dir } = req.body;
+    const resolved = await setSearchDir(dir);
+    const files = await listAvailableMdbFiles();
+    res.json({ message: 'Carpeta de búsqueda actualizada', searchDir: resolved, files });
   } catch (err) { next(err); }
 }
 
@@ -41,4 +53,4 @@ async function records(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { listFiles, getActive, setActive, importData, records };
+module.exports = { listFiles, getActive, setActive, updateSearchDir, importData, records };

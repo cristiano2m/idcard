@@ -26,6 +26,19 @@ router.get('/files', ...adminOnly, ctrl.listFiles);
 router.get('/active', ...adminOnly, ctrl.getActive);
 
 /** @swagger
+ * /mdb/search-dir:
+ *   post:
+ *     summary: Cambiar la carpeta donde se buscan archivos .mdb
+ *     tags: [Mdb]
+ *     security: [{ cookieAuth: [] }]
+ */
+router.post('/search-dir', ...adminOnly,
+  [body('dir').trim().notEmpty().withMessage('La ruta de carpeta es requerida')],
+  validate,
+  ctrl.updateSearchDir
+);
+
+/** @swagger
  * /mdb/active:
  *   post:
  *     summary: Cambiar la base .mdb activa

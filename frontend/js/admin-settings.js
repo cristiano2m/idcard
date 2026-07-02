@@ -11,24 +11,56 @@ document.getElementById('btn-save-settings').addEventListener('click', async () 
 });
 
 async function loadMdbFiles() {
-  const { files, active } = await apiGet('/mdb/files');
+  const { files, active, searchDir } = await apiGet('/mdb/files');
+
+  // Mostrar carpeta actual
+  document.getElementById('mdb-search-dir').value = searchDir || '';
+  document.getElementById('mdb-search-dir-current').textContent =
+    `Carpeta actual: ${searchDir || '(predeterminada)'}`;
+
+  // Llenar select
   const select = document.getElementById('mdb-file-select');
-  select.innerHTML = files.map(f =>
-    `<option value="${escapeHtml(f.path)}" ${f.path === active.mdbPath ? 'selected' : ''}>
-      ${escapeHtml(f.name)} (${f.sizeMB} MB)
-    </option>`
-  ).join('') || '<option value="">No se encontraron archivos .mdb</option>';
+  if (files.length === 0) {
+    select.innerHTML = '<option value="">No se encontraron archivos .mdb en esa carpeta</option>';
+  } else {
+    select.innerHTML = files.map(f =>
+      `<option value="${escapeHtml(f.path)}" ${f.path === active.mdbPath ? 'selected' : ''}>
+        ${escapeHtml(f.name)} (${f.sizeMB} MB)
+      </option>`
+    ).join('');
+  }
 
   document.getElementById('mdb-active-info').textContent =
-    `Base activa actual: ${active.mdbPath} (tabla: ${active.tableName})`;
+    `Base activa: ${active.mdbPath} (tabla: ${active.tableName})`;
 }
+
+document.getElementById('btn-set-search-dir').addEventListener('click', async () => {
+  const dir = document.getElementById('mdb-search-dir').value.trim();
+  if (!dir) { showError('Ingresa una ruta de carpeta'); return; }
+  try {
+    const result = await apiPost('/mdb/search-dir', { dir });
+    showSuccess(`Carpeta actualizada. Se encontraron ${result.files.length} archivo(s) .mdb`);
+    await loadMdbFiles();
+  } catch (err) { showError(err.message); }
+});
 
 document.getElementById('btn-activate-mdb').addEventListener('click', async () => {
   const mdbPath = document.getElementById('mdb-file-select').value;
-  if (!mdbPath) return;
+  if (!mdbPath) { showError('Selecciona un archivo de la lista'); return; }
   try {
     await apiPost('/mdb/active', { mdbPath });
     showSuccess('Base de datos activa actualizada');
+    await loadMdbFiles();
+  } catch (err) { showError(err.message); }
+});
+
+document.getElementById('btn-activate-direct').addEventListener('click', async () => {
+  const mdbPath = document.getElementById('mdb-direct-path').value.trim();
+  if (!mdbPath) { showError('Ingresa la ruta completa al archivo .mdb'); return; }
+  try {
+    await apiPost('/mdb/active', { mdbPath });
+    showSuccess('Base de datos activa actualizada');
+    document.getElementById('mdb-direct-path').value = '';
     await loadMdbFiles();
   } catch (err) { showError(err.message); }
 });

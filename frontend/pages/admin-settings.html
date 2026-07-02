@@ -28,23 +28,56 @@
     <div class="card shadow-sm mt-4">
       <div class="card-header bg-white">Base de datos MDB (sistema de impresión)</div>
       <div class="card-body">
+
+        <!-- Carpeta de búsqueda -->
+        <h6 class="fw-semibold">1. Carpeta donde buscar archivos .mdb</h6>
         <p class="text-muted small">
-          Selecciona cuál archivo <code>.mdb</code> usará la aplicación para insertar credenciales
-          (modo <code>mdb-hybrid</code>). Los archivos se detectan automáticamente en la carpeta
-          <code>base/</code>.
+          Ingresa la ruta completa de la carpeta que contiene los archivos <code>.mdb</code>.
+          Puede ser una ruta local (<code>C:\Datos</code>) o de red (<code>\\servidor\compartido</code>).
         </p>
         <div class="row g-2 align-items-end mb-3">
-          <div class="col-md-6">
-            <label class="form-label">Archivo .mdb disponible</label>
-            <select class="form-select" id="mdb-file-select"></select>
+          <div class="col-md-8">
+            <label class="form-label">Ruta de carpeta</label>
+            <input type="text" class="form-control font-monospace" id="mdb-search-dir"
+              placeholder="Ej: C:\Datos  o  \\servidor\compartido">
+            <div class="form-text" id="mdb-search-dir-current"></div>
           </div>
-          <div class="col-md-3">
-            <button class="btn btn-outline-primary" id="btn-activate-mdb">Activar esta base</button>
-          </div>
-          <div class="col-md-3">
-            <button class="btn btn-outline-secondary" id="btn-import-mdb">Importar registros desde la activa</button>
+          <div class="col-md-4">
+            <button class="btn btn-outline-primary w-100" id="btn-set-search-dir">
+              Buscar en esta carpeta
+            </button>
           </div>
         </div>
+
+        <hr class="my-3">
+
+        <!-- Seleccionar archivo de la lista -->
+        <h6 class="fw-semibold">2. Seleccionar archivo .mdb</h6>
+        <div class="row g-2 align-items-end mb-2">
+          <div class="col-md-7">
+            <label class="form-label">Archivos encontrados en la carpeta</label>
+            <select class="form-select" id="mdb-file-select">
+              <option value="">— primero elige una carpeta arriba —</option>
+            </select>
+          </div>
+          <div class="col-md-5 d-flex gap-2">
+            <button class="btn btn-outline-primary flex-fill" id="btn-activate-mdb">Activar seleccionado</button>
+            <button class="btn btn-outline-secondary flex-fill" id="btn-import-mdb">Importar registros</button>
+          </div>
+        </div>
+
+        <!-- Ruta directa -->
+        <p class="text-muted small mt-2 mb-1">O ingresa la ruta completa a un archivo .mdb específico:</p>
+        <div class="row g-2 align-items-end mb-3">
+          <div class="col-md-8">
+            <input type="text" class="form-control font-monospace" id="mdb-direct-path"
+              placeholder="Ej: C:\Datos\DPSL_2024.MDB">
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-outline-primary w-100" id="btn-activate-direct">Activar esta ruta</button>
+          </div>
+        </div>
+
         <div id="mdb-active-info" class="alert alert-info small mb-0"></div>
         <div id="mdb-import-result" class="alert alert-success small mt-2 d-none"></div>
         <div class="mt-3">

@@ -3,7 +3,22 @@ const path = require('path');
 const config = require('../../config/config');
 const { getSettingsRepository } = require('../RepositoryFactory');
 
-const MDB_BASE_DIR = path.dirname(config.mdbPath);
+const DEFAULT_SEARCH_DIR = path.dirname(config.mdbPath);
+
+async function getSearchDir() {
+  const settings = getSettingsRepository();
+  const saved = await settings.get('mdb_search_dir');
+  return saved || DEFAULT_SEARCH_DIR;
+}
+
+async function setSearchDir(dir) {
+  const resolved = path.resolve(dir);
+  if (!fs.existsSync(resolved)) throw new Error(`Carpeta no encontrada: ${resolved}`);
+  if (!fs.statSync(resolved).isDirectory()) throw new Error(`La ruta no es una carpeta: ${resolved}`);
+  const settings = getSettingsRepository();
+  await settings.set('mdb_search_dir', resolved);
+  return resolved;
+}
 
 async function getActiveConnectionInfo() {
   const settings = getSettingsRepository();
@@ -26,20 +41,24 @@ async function setActivePath(mdbPath, tableName) {
   return { mdbPath: resolved, tableName: tableName || config.mdbTableName };
 }
 
-function listAvailableMdbFiles() {
-  if (!fs.existsSync(MDB_BASE_DIR)) return [];
-  return fs.readdirSync(MDB_BASE_DIR)
+async function listAvailableMdbFiles() {
+  const dir = await getSearchDir();
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir)
     .filter(f => /\.mdb$/i.test(f))
     .map(f => {
-      const full = path.join(MDB_BASE_DIR, f);
-      const stat = fs.statSync(full);
-      return {
-        name: f,
-        path: full,
-        sizeMB: +(stat.size / (1024 * 1024)).toFixed(1),
-        modifiedAt: stat.mtime.toISOString(),
-      };
-    });
+      const full = path.join(dir, f);
+      try {
+        const stat = fs.statSync(full);
+        return {
+          name: f,
+          path: full,
+          sizeMB: +(stat.size / (1024 * 1024)).toFixed(1),
+          modifiedAt: stat.mtime.toISOString(),
+        };
+      } catch { return null; }
+    })
+    .filter(Boolean);
 }
 
-module.exports = { getActiveConnectionInfo, setActivePath, listAvailableMdbFiles, MDB_BASE_DIR };
+module.exports = { getActiveConnectionInfo, setActivePath, listAvailableMdbFiles, getSearchDir, setSearchDir, DEFAULT_SEARCH_DIR };
