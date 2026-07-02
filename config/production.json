@@ -1,5 +1,5 @@
 {
-  "isHttps": true,
-  "sameSitePolicy": "none",
+  "isHttps": false,
+  "sameSitePolicy": "lax",
   "logLevel": "warn"
 }

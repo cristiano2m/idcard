@@ -38,8 +38,8 @@ const config = Object.freeze({
     ? process.env.CORS_ORIGINS.split(',').map(s => s.trim())
     : merged.corsOrigins,
 
-  isHttps: merged.isHttps,
-  sameSitePolicy: merged.sameSitePolicy,
+  isHttps: process.env.IS_HTTPS === 'true' ? true : process.env.IS_HTTPS === 'false' ? false : merged.isHttps,
+  sameSitePolicy: process.env.SAME_SITE_POLICY || merged.sameSitePolicy,
   uploadMaxSizeBytes: merged.uploadMaxSizeBytes,
   logLevel: merged.logLevel,
   logDir: path.resolve(__dirname, '../../../../logs'),
