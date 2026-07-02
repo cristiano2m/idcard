@@ -9,7 +9,7 @@
   "photosAbsoluteBasePath": "",
   "jwtExpiresIn": "8h",
   "cookieMaxAgeMs": 28800000,
-  "corsOrigins": ["http://localhost:3000"],
+  "corsOrigins": ["*"],
   "isHttps": false,
   "sameSitePolicy": "lax",
   "uploadMaxSizeBytes": 5242880,
