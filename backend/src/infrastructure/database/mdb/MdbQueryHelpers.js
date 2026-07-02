@@ -2,9 +2,10 @@ const ADODB = require('node-adodb');
 const path = require('path');
 const { getActiveConnectionInfo, getPassword } = require('./MdbConfigService');
 
-// SysNative solo existe para procesos de 32 bits en Windows de 64 bits (bypass WoW64).
-// Con Node.js de 64 bits, System32 ya tiene cscript.exe de 64 bits y SysNative no existe.
-const ADODB_X64 = process.arch === 'ia32';
+// node-adodb engine.js: x64=true → System32\cscript.exe (64-bit)
+//                       x64=false → SysWOW64\cscript.exe (32-bit, no encuentra ACE OLEDB 64-bit)
+// Este sistema tiene el driver Microsoft.ACE.OLEDB.12.0 de 64 bits, siempre usar x64=true.
+const ADODB_X64 = true;
 
 function buildConnectionString(mdbPath, password) {
   const passwordPart = password ? `Jet OLEDB:Database Password=${password};` : '';
