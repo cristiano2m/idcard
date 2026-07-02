@@ -15,21 +15,20 @@ document.getElementById('btn-save-settings').addEventListener('click', async () 
 // ---------------------------------------------------------------------------
 let activeInfo = null;
 
-async function loadTablesIntoSelect(mdbPath, selectEl, activeTable) {
-  selectEl.innerHTML = '<option value="">Cargando tablas...</option>';
-  selectEl.disabled = true;
+async function loadTablesIntoDatalist(mdbPath, datalistEl, inputEl, hintEl, activeTable) {
+  if (hintEl) hintEl.textContent = ' (cargando...)';
+  inputEl.placeholder = 'Cargando tablas...';
   try {
     const { tables } = await apiGet(`/mdb/tables?mdbPath=${encodeURIComponent(mdbPath)}`);
-    if (tables.length === 0) {
-      selectEl.innerHTML = '<option value="">No se encontraron tablas</option>';
-    } else {
-      selectEl.innerHTML = tables.map(t =>
-        `<option value="${escapeHtml(t)}" ${t === activeTable ? 'selected' : ''}>${escapeHtml(t)}</option>`
-      ).join('');
-      selectEl.disabled = false;
-    }
-  } catch {
-    selectEl.innerHTML = '<option value="">Error al leer tablas</option>';
+    datalistEl.innerHTML = tables.map(t => `<option value="${escapeHtml(t)}">`).join('');
+    if (activeTable && !inputEl.value) inputEl.value = activeTable;
+    if (hintEl) hintEl.textContent = tables.length ? ` (${tables.length} tablas detectadas)` : '';
+    inputEl.placeholder = 'Ej: DPSL_2024';
+  } catch (err) {
+    datalistEl.innerHTML = '';
+    if (hintEl) hintEl.textContent = ' (escribe el nombre manualmente)';
+    inputEl.placeholder = 'Escribe el nombre de la tabla';
+    if (activeTable && !inputEl.value) inputEl.value = activeTable;
   }
 }
 
@@ -50,8 +49,6 @@ async function loadMdbFiles() {
   const fileSelect = document.getElementById('mdb-file-select');
   if (files.length === 0) {
     fileSelect.innerHTML = '<option value="">No se encontraron archivos .mdb en esa carpeta</option>';
-    document.getElementById('mdb-table-select').innerHTML = '<option value="">—</option>';
-    document.getElementById('mdb-table-select').disabled = true;
   } else {
     fileSelect.innerHTML = files.map(f =>
       `<option value="${escapeHtml(f.path)}" ${f.path === active.mdbPath ? 'selected' : ''}>
@@ -59,10 +56,16 @@ async function loadMdbFiles() {
       </option>`
     ).join('');
 
-    // Cargar tablas del archivo seleccionado
+    // Cargar tablas del archivo seleccionado (autocompletado)
     const selectedPath = fileSelect.value;
     if (selectedPath) {
-      await loadTablesIntoSelect(selectedPath, document.getElementById('mdb-table-select'), active.tableName);
+      await loadTablesIntoDatalist(
+        selectedPath,
+        document.getElementById('mdb-tables-datalist'),
+        document.getElementById('mdb-table-input'),
+        document.getElementById('mdb-table-hint'),
+        active.tableName
+      );
     }
   }
 
@@ -70,17 +73,18 @@ async function loadMdbFiles() {
     `Base activa: ${active.mdbPath} | Tabla: ${active.tableName}`;
 }
 
-// Al cambiar el archivo del dropdown → cargar sus tablas
+// Al cambiar el archivo → cargar tablas para autocompletado
 document.getElementById('mdb-file-select').addEventListener('change', async function () {
   const mdbPath = this.value;
-  const tableSelect = document.getElementById('mdb-table-select');
-  if (!mdbPath) {
-    tableSelect.innerHTML = '<option value="">— selecciona un archivo —</option>';
-    tableSelect.disabled = true;
-    return;
-  }
-  const activeTable = activeInfo ? activeInfo.tableName : null;
-  await loadTablesIntoSelect(mdbPath, tableSelect, activeTable);
+  if (!mdbPath) return;
+  document.getElementById('mdb-table-input').value = '';
+  await loadTablesIntoDatalist(
+    mdbPath,
+    document.getElementById('mdb-tables-datalist'),
+    document.getElementById('mdb-table-input'),
+    document.getElementById('mdb-table-hint'),
+    null
+  );
 });
 
 document.getElementById('btn-set-search-dir').addEventListener('click', async () => {
@@ -95,9 +99,9 @@ document.getElementById('btn-set-search-dir').addEventListener('click', async ()
 
 document.getElementById('btn-activate-mdb').addEventListener('click', async () => {
   const mdbPath = document.getElementById('mdb-file-select').value;
-  const tableName = document.getElementById('mdb-table-select').value;
+  const tableName = document.getElementById('mdb-table-input').value.trim();
   if (!mdbPath) { showError('Selecciona un archivo de la lista'); return; }
-  if (!tableName) { showError('Selecciona una tabla'); return; }
+  if (!tableName) { showError('Escribe o selecciona el nombre de la tabla'); return; }
   try {
     await apiPost('/mdb/active', { mdbPath, tableName });
     showSuccess(`Base activada: ${tableName}`);
@@ -105,25 +109,31 @@ document.getElementById('btn-activate-mdb').addEventListener('click', async () =
   } catch (err) { showError(err.message); }
 });
 
-// Ruta directa — cargar tablas
+// Ruta directa — cargar tablas para autocompletado
 document.getElementById('btn-load-direct-tables').addEventListener('click', async () => {
   const mdbPath = document.getElementById('mdb-direct-path').value.trim();
   if (!mdbPath) { showError('Ingresa la ruta completa al archivo .mdb'); return; }
-  await loadTablesIntoSelect(mdbPath, document.getElementById('mdb-direct-table-select'), null);
+  await loadTablesIntoDatalist(
+    mdbPath,
+    document.getElementById('mdb-direct-tables-datalist'),
+    document.getElementById('mdb-direct-table-input'),
+    null,
+    null
+  );
 });
 
 // Ruta directa — activar
 document.getElementById('btn-activate-direct').addEventListener('click', async () => {
   const mdbPath = document.getElementById('mdb-direct-path').value.trim();
-  const tableName = document.getElementById('mdb-direct-table-select').value;
+  const tableName = document.getElementById('mdb-direct-table-input').value.trim();
   if (!mdbPath) { showError('Ingresa la ruta completa al archivo .mdb'); return; }
-  if (!tableName) { showError('Carga las tablas y selecciona una'); return; }
+  if (!tableName) { showError('Escribe el nombre de la tabla'); return; }
   try {
     await apiPost('/mdb/active', { mdbPath, tableName });
     showSuccess(`Base activada: ${tableName}`);
     document.getElementById('mdb-direct-path').value = '';
-    document.getElementById('mdb-direct-table-select').innerHTML = '<option value="">— carga tablas —</option>';
-    document.getElementById('mdb-direct-table-select').disabled = true;
+    document.getElementById('mdb-direct-table-input').value = '';
+    document.getElementById('mdb-direct-tables-datalist').innerHTML = '';
     await loadMdbFiles();
   } catch (err) { showError(err.message); }
 });

@@ -24,24 +24,33 @@ async function getConnectionForPath(mdbPath) {
 
 async function listTablesInMdb(mdbPath) {
   const conn = await getConnectionForPath(mdbPath);
+  let lastError;
+
+  // Intento 1: schema ADO (adSchemaTables = 20)
   try {
-    // adSchemaTables = 20, devuelve todas las tablas y vistas
     const rows = await conn.schema(20);
-    return rows
+    const tables = rows
       .filter(r => r.TABLE_TYPE === 'TABLE')
       .map(r => r.TABLE_NAME)
       .sort();
-  } catch {
-    // Fallback: consultar MSysObjects directamente
-    try {
-      const rows = await conn.query(
-        "SELECT Name FROM MSysObjects WHERE Type=1 AND Flags=0 ORDER BY Name"
-      );
-      return rows.map(r => r.Name).filter(Boolean).sort();
-    } catch {
-      return [];
-    }
-  }
+    if (tables.length > 0) return tables;
+  } catch (e) { lastError = e; }
+
+  // Intento 2: MSysObjects (tabla de sistema de Access)
+  try {
+    const rows = await conn.query(
+      'SELECT Name FROM MSysObjects WHERE Type=1 AND Flags=0 ORDER BY Name'
+    );
+    const tables = rows.map(r => r.Name).filter(Boolean).sort();
+    if (tables.length > 0) return tables;
+  } catch (e) { lastError = e; }
+
+  // Si ambos fallan, lanzar el error para que el frontend lo muestre
+  throw new Error(
+    `No se pudieron leer las tablas del archivo MDB. ` +
+    `Ingresa el nombre de la tabla manualmente. ` +
+    `(Detalle: ${lastError ? lastError.message : 'sin detalle'})`
+  );
 }
 
 function deriveEstado(row) {
