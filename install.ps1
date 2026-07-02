@@ -10,7 +10,9 @@
     .\install.ps1
 #>
 
-$ErrorActionPreference = "Stop"
+# "Continue" evita que mensajes de stderr de programas externos (ej: npm warn)
+# detengan el script. Los errores reales se detectan revisando $LASTEXITCODE.
+$ErrorActionPreference = "Continue"
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BackendDir  = Join-Path $ProjectRoot "backend"
 
@@ -88,11 +90,10 @@ if (-not $nodeOk) {
 Write-Step "Instalando dependencias Node (puede tardar 1-2 min)..."
 Push-Location $BackendDir
 try {
-    $output = & npm install 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        $output | ForEach-Object { Write-Host "    $_" }
-        Write-Fail "npm install fallo. Revisa la salida de arriba."
-    }
+    # Ejecutar npm directamente (sin redirigir stderr) para que las advertencias
+    # se muestren en pantalla pero no detengan el script.
+    npm install
+    if ($LASTEXITCODE -ne 0) { Write-Fail "npm install fallo (codigo $LASTEXITCODE)" }
     Write-Ok "Dependencias instaladas"
 } finally { Pop-Location }
 
@@ -157,15 +158,11 @@ New-Item -ItemType Directory -Force -Path (Join-Path $ProjectRoot "logs") | Out-
 Write-Step "Inicializando base de datos SQLite..."
 Push-Location $BackendDir
 try {
-    $out = & npm run migrate 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        $out | ForEach-Object { Write-Host "    $_" }
-        Write-Fail "Las migraciones fallaron."
-    }
+    npm run migrate
+    if ($LASTEXITCODE -ne 0) { Write-Fail "Las migraciones fallaron (codigo $LASTEXITCODE)" }
     Write-Ok "Tablas SQLite creadas / actualizadas"
 
-    $out = & npm run seed 2>&1
-    # El seed puede "fallar" con codigo 0 si el admin ya existe — solo advertir
+    npm run seed
     if ($LASTEXITCODE -ne 0) {
         Write-Warn "Seed retorno codigo $LASTEXITCODE (puede que el usuario admin ya existia)"
     } else {
