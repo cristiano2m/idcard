@@ -1,4 +1,5 @@
 const { listAvailableMdbFiles, getActiveConnectionInfo, setActivePath, getSearchDir, setSearchDir, setPassword } = require('../../infrastructure/database/mdb/MdbConfigService');
+const { listTablesInMdb } = require('../../infrastructure/database/mdb/MdbQueryHelpers');
 const { importFromMdb } = require('../../application/use-cases/mdb/ImportFromMdb');
 const { listMdbRecords } = require('../../application/use-cases/mdb/ListMdbRecords');
 
@@ -53,6 +54,15 @@ async function records(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function listTables(req, res, next) {
+  try {
+    const { mdbPath } = req.query;
+    if (!mdbPath) return res.status(400).json({ error: 'mdbPath requerido' });
+    const tables = await listTablesInMdb(mdbPath);
+    res.json({ tables });
+  } catch (err) { next(err); }
+}
+
 async function updatePassword(req, res, next) {
   try {
     const { password } = req.body;
@@ -61,4 +71,4 @@ async function updatePassword(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { listFiles, getActive, setActive, updateSearchDir, updatePassword, importData, records };
+module.exports = { listFiles, getActive, setActive, listTables, updateSearchDir, updatePassword, importData, records };

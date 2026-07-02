@@ -52,29 +52,43 @@
         <hr class="my-3">
 
         <!-- Seleccionar archivo de la lista -->
-        <h6 class="fw-semibold">2. Seleccionar archivo .mdb</h6>
-        <div class="row g-2 align-items-end mb-2">
-          <div class="col-md-7">
-            <label class="form-label">Archivos encontrados en la carpeta</label>
+        <h6 class="fw-semibold">2. Seleccionar archivo y tabla</h6>
+        <div class="row g-2 mb-2">
+          <div class="col-md-5">
+            <label class="form-label">Archivo .mdb</label>
             <select class="form-select" id="mdb-file-select">
               <option value="">— primero elige una carpeta arriba —</option>
             </select>
           </div>
-          <div class="col-md-5 d-flex gap-2">
-            <button class="btn btn-outline-primary flex-fill" id="btn-activate-mdb">Activar seleccionado</button>
-            <button class="btn btn-outline-secondary flex-fill" id="btn-import-mdb">Importar registros</button>
+          <div class="col-md-4">
+            <label class="form-label">Tabla</label>
+            <select class="form-select" id="mdb-table-select" disabled>
+              <option value="">— selecciona un archivo —</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex flex-column gap-2 justify-content-end">
+            <button class="btn btn-outline-primary" id="btn-activate-mdb">Activar seleccionado</button>
+            <button class="btn btn-outline-secondary" id="btn-import-mdb">Importar registros</button>
           </div>
         </div>
 
         <!-- Ruta directa -->
-        <p class="text-muted small mt-2 mb-1">O ingresa la ruta completa a un archivo .mdb específico:</p>
+        <p class="text-muted small mt-3 mb-1">O ingresa la ruta completa a un archivo .mdb específico:</p>
         <div class="row g-2 align-items-end mb-3">
-          <div class="col-md-8">
+          <div class="col-md-5">
             <input type="text" class="form-control font-monospace" id="mdb-direct-path"
               placeholder="Ej: C:\Datos\DPSL_2024.MDB">
           </div>
-          <div class="col-md-4">
-            <button class="btn btn-outline-primary w-100" id="btn-activate-direct">Activar esta ruta</button>
+          <div class="col-md-3">
+            <select class="form-select" id="mdb-direct-table-select" disabled>
+              <option value="">— carga tablas —</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" id="btn-load-direct-tables">Cargar tablas</button>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-primary w-100" id="btn-activate-direct">Activar</button>
           </div>
         </div>
 

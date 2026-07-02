@@ -10,33 +10,78 @@ document.getElementById('btn-save-settings').addEventListener('click', async () 
   } catch (err) { showError(err.message); }
 });
 
+// ---------------------------------------------------------------------------
+// MDB — estado compartido
+// ---------------------------------------------------------------------------
+let activeInfo = null;
+
+async function loadTablesIntoSelect(mdbPath, selectEl, activeTable) {
+  selectEl.innerHTML = '<option value="">Cargando tablas...</option>';
+  selectEl.disabled = true;
+  try {
+    const { tables } = await apiGet(`/mdb/tables?mdbPath=${encodeURIComponent(mdbPath)}`);
+    if (tables.length === 0) {
+      selectEl.innerHTML = '<option value="">No se encontraron tablas</option>';
+    } else {
+      selectEl.innerHTML = tables.map(t =>
+        `<option value="${escapeHtml(t)}" ${t === activeTable ? 'selected' : ''}>${escapeHtml(t)}</option>`
+      ).join('');
+      selectEl.disabled = false;
+    }
+  } catch {
+    selectEl.innerHTML = '<option value="">Error al leer tablas</option>';
+  }
+}
+
 async function loadMdbFiles() {
   const { files, active, searchDir } = await apiGet('/mdb/files');
+  activeInfo = active;
 
-  // Estado de contraseña
+  // Contraseña
   document.getElementById('mdb-password-status').textContent =
     active.hasPassword ? 'Contraseña configurada: Sí' : 'Contraseña configurada: No';
 
-  // Mostrar carpeta actual
+  // Carpeta actual
   document.getElementById('mdb-search-dir').value = searchDir || '';
   document.getElementById('mdb-search-dir-current').textContent =
     `Carpeta actual: ${searchDir || '(predeterminada)'}`;
 
-  // Llenar select
-  const select = document.getElementById('mdb-file-select');
+  // Archivos
+  const fileSelect = document.getElementById('mdb-file-select');
   if (files.length === 0) {
-    select.innerHTML = '<option value="">No se encontraron archivos .mdb en esa carpeta</option>';
+    fileSelect.innerHTML = '<option value="">No se encontraron archivos .mdb en esa carpeta</option>';
+    document.getElementById('mdb-table-select').innerHTML = '<option value="">—</option>';
+    document.getElementById('mdb-table-select').disabled = true;
   } else {
-    select.innerHTML = files.map(f =>
+    fileSelect.innerHTML = files.map(f =>
       `<option value="${escapeHtml(f.path)}" ${f.path === active.mdbPath ? 'selected' : ''}>
         ${escapeHtml(f.name)} (${f.sizeMB} MB)
       </option>`
     ).join('');
+
+    // Cargar tablas del archivo seleccionado
+    const selectedPath = fileSelect.value;
+    if (selectedPath) {
+      await loadTablesIntoSelect(selectedPath, document.getElementById('mdb-table-select'), active.tableName);
+    }
   }
 
   document.getElementById('mdb-active-info').textContent =
-    `Base activa: ${active.mdbPath} (tabla: ${active.tableName})`;
+    `Base activa: ${active.mdbPath} | Tabla: ${active.tableName}`;
 }
+
+// Al cambiar el archivo del dropdown → cargar sus tablas
+document.getElementById('mdb-file-select').addEventListener('change', async function () {
+  const mdbPath = this.value;
+  const tableSelect = document.getElementById('mdb-table-select');
+  if (!mdbPath) {
+    tableSelect.innerHTML = '<option value="">— selecciona un archivo —</option>';
+    tableSelect.disabled = true;
+    return;
+  }
+  const activeTable = activeInfo ? activeInfo.tableName : null;
+  await loadTablesIntoSelect(mdbPath, tableSelect, activeTable);
+});
 
 document.getElementById('btn-set-search-dir').addEventListener('click', async () => {
   const dir = document.getElementById('mdb-search-dir').value.trim();
@@ -50,26 +95,42 @@ document.getElementById('btn-set-search-dir').addEventListener('click', async ()
 
 document.getElementById('btn-activate-mdb').addEventListener('click', async () => {
   const mdbPath = document.getElementById('mdb-file-select').value;
+  const tableName = document.getElementById('mdb-table-select').value;
   if (!mdbPath) { showError('Selecciona un archivo de la lista'); return; }
+  if (!tableName) { showError('Selecciona una tabla'); return; }
   try {
-    await apiPost('/mdb/active', { mdbPath });
-    showSuccess('Base de datos activa actualizada');
+    await apiPost('/mdb/active', { mdbPath, tableName });
+    showSuccess(`Base activada: ${tableName}`);
     await loadMdbFiles();
   } catch (err) { showError(err.message); }
 });
 
-document.getElementById('btn-activate-direct').addEventListener('click', async () => {
+// Ruta directa — cargar tablas
+document.getElementById('btn-load-direct-tables').addEventListener('click', async () => {
   const mdbPath = document.getElementById('mdb-direct-path').value.trim();
   if (!mdbPath) { showError('Ingresa la ruta completa al archivo .mdb'); return; }
+  await loadTablesIntoSelect(mdbPath, document.getElementById('mdb-direct-table-select'), null);
+});
+
+// Ruta directa — activar
+document.getElementById('btn-activate-direct').addEventListener('click', async () => {
+  const mdbPath = document.getElementById('mdb-direct-path').value.trim();
+  const tableName = document.getElementById('mdb-direct-table-select').value;
+  if (!mdbPath) { showError('Ingresa la ruta completa al archivo .mdb'); return; }
+  if (!tableName) { showError('Carga las tablas y selecciona una'); return; }
   try {
-    await apiPost('/mdb/active', { mdbPath });
-    showSuccess('Base de datos activa actualizada');
+    await apiPost('/mdb/active', { mdbPath, tableName });
+    showSuccess(`Base activada: ${tableName}`);
     document.getElementById('mdb-direct-path').value = '';
+    document.getElementById('mdb-direct-table-select').innerHTML = '<option value="">— carga tablas —</option>';
+    document.getElementById('mdb-direct-table-select').disabled = true;
     await loadMdbFiles();
   } catch (err) { showError(err.message); }
 });
 
-// Mostrar/ocultar contraseña
+// ---------------------------------------------------------------------------
+// Contraseña
+// ---------------------------------------------------------------------------
 document.getElementById('btn-toggle-password').addEventListener('click', () => {
   const input = document.getElementById('mdb-password');
   input.type = input.type === 'password' ? 'text' : 'password';
@@ -95,6 +156,9 @@ document.getElementById('btn-clear-password').addEventListener('click', async ()
   } catch (err) { showError(err.message); }
 });
 
+// ---------------------------------------------------------------------------
+// Importar
+// ---------------------------------------------------------------------------
 document.getElementById('btn-import-mdb').addEventListener('click', async () => {
   if (!confirm('¿Importar todos los registros de la base activa hacia la aplicación? Esto puede tardar unos segundos.')) return;
   try {
@@ -106,6 +170,9 @@ document.getElementById('btn-import-mdb').addEventListener('click', async () => 
   } catch (err) { showError(err.message); }
 });
 
+// ---------------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------------
 (async () => {
   await requireAuth();
   renderNavbar('admin-settings');

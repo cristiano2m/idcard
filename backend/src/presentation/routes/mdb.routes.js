@@ -32,6 +32,8 @@ router.get('/active', ...adminOnly, ctrl.getActive);
  *     tags: [Mdb]
  *     security: [{ cookieAuth: [] }]
  */
+router.get('/tables', ...adminOnly, ctrl.listTables);
+
 router.post('/search-dir', ...adminOnly,
   [body('dir').trim().notEmpty().withMessage('La ruta de carpeta es requerida')],
   validate,
