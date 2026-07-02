@@ -62,10 +62,10 @@ async function remove(req, res, next) {
 
 async function search(req, res, next) {
   try {
-    const { page = 1, pageSize = 20, nombre, equipo, documentoId, estado, fechaDesde, fechaHasta } = req.query;
+    const { page = 1, pageSize = 20, nombre, equipo, documentoId, estado, fechaDesde, fechaHasta, sortBy, sortDir } = req.query;
     const result = await searchPersons(
       { nombre, equipo, documentoId, estado, fechaDesde, fechaHasta },
-      { page: +page, pageSize: +pageSize }
+      { page: +page, pageSize: +pageSize, sortBy, sortDir }
     );
     res.json(result);
   } catch (err) { next(err); }

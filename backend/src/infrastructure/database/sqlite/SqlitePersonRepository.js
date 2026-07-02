@@ -90,7 +90,7 @@ class SqlitePersonRepository extends IPersonRepository {
     return { items, total, page, pageSize };
   }
 
-  async search(filters = {}, { page = 1, pageSize = 20 } = {}) {
+  async search(filters = {}, { page = 1, pageSize = 20, sortBy = 'created_at', sortDir = 'DESC' } = {}) {
     const db = getDb();
     const where = ['deleted_at IS NULL'];
     const vals = [];
@@ -101,10 +101,14 @@ class SqlitePersonRepository extends IPersonRepository {
     if (filters.fechaDesde) { where.push('created_at >= ?'); vals.push(filters.fechaDesde); }
     if (filters.fechaHasta) { where.push('created_at <= ?'); vals.push(filters.fechaHasta + ' 23:59:59'); }
 
+    const ALLOWED_SORT = { nombre: 'nombre', apellido: 'apellido', equipo: 'equipo', estado: 'estado', fecha: 'created_at', camiseta: 'numero_camiseta' };
+    const col = ALLOWED_SORT[sortBy] || 'created_at';
+    const dir = sortDir === 'ASC' ? 'ASC' : 'DESC';
+
     const clause = where.join(' AND ');
     const total = db.prepare(`SELECT COUNT(*) AS c FROM persons WHERE ${clause}`).get(...vals).c;
     const offset = (page - 1) * pageSize;
-    const items = db.prepare(`SELECT * FROM persons WHERE ${clause} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+    const items = db.prepare(`SELECT * FROM persons WHERE ${clause} ORDER BY ${col} ${dir} LIMIT ? OFFSET ?`)
       .all(...vals, pageSize, offset).map(toPerson);
     return { items, total, page, pageSize };
   }

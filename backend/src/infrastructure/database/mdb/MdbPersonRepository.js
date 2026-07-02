@@ -4,7 +4,7 @@ const IPersonRepository = require('../../../domain/repositories/IPersonRepositor
 const Person = require('../../../domain/entities/Person');
 const { getDb } = require('../sqlite/SqliteConnection');
 const { getActiveConnectionInfo } = require('./MdbConfigService');
-const { getConnection, deriveEstado } = require('./MdbQueryHelpers');
+const { getConnection, deriveEstado, MDB_SAFE_COLUMNS } = require('./MdbQueryHelpers');
 
 function esc(v) {
   return (v || '').toString().replace(/'/g, "''");
@@ -69,7 +69,7 @@ class MdbPersonRepository extends IPersonRepository {
       try {
         const conn = await getConnection();
         const { tableName } = await getActiveConnectionInfo();
-        const mdbRows = await conn.query(`SELECT * FROM ${tableName} WHERE RecordID = ${row.mdb_record_id}`);
+        const mdbRows = await conn.query(`SELECT ${MDB_SAFE_COLUMNS} FROM ${tableName} WHERE RecordID = ${row.mdb_record_id}`);
         if (mdbRows[0]) {
           row.estado = deriveEstado(mdbRows[0]);
           sqliteDb.prepare("UPDATE persons SET estado = ? WHERE id = ?").run(row.estado, id);

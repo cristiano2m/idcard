@@ -33,6 +33,7 @@ router.get('/active', ...adminOnly, ctrl.getActive);
  *     security: [{ cookieAuth: [] }]
  */
 router.get('/tables', ...adminOnly, ctrl.listTables);
+router.get('/teams', ...adminOnly, ctrl.listTeams);
 
 router.post('/search-dir', ...adminOnly,
   [body('dir').trim().notEmpty().withMessage('La ruta de carpeta es requerida')],
@@ -75,5 +76,7 @@ router.post('/import', ...adminOnly, ctrl.importData);
  *     security: [{ cookieAuth: [] }]
  */
 router.get('/records', ...adminOnly, ctrl.records);
+router.get('/records/:recordId', ...adminOnly, ctrl.getRecord);
+router.put('/records/:recordId', ...adminOnly, ctrl.updateRecord);
 
 module.exports = router;

@@ -54,10 +54,16 @@ async function listTablesInMdb(mdbPath) {
   );
 }
 
+// Safe columns for SELECT — excludes Photo_1 (binary OLE in some MDB schemas)
+const MDB_SAFE_COLUMNS = 'RecordID, RECORD_, FIRST_NAME, LAST_NAME, TEAM_NAME, I_D_, D_O_B_, SHIRT_, PrintCount, VoidFlag';
+
 function deriveEstado(row) {
-  if (row.VoidFlag && row.VoidFlag.trim() !== '') return 'Cancelado';
+  // VoidFlag may be boolean (some MDB schemas) or a string
+  const voided = row.VoidFlag === true || row.VoidFlag === 1 ||
+    (typeof row.VoidFlag === 'string' && row.VoidFlag.trim() !== '');
+  if (voided) return 'Cancelado';
   if (row.PrintCount > 0) return 'Impreso';
   return 'Pendiente';
 }
 
-module.exports = { getConnection, getConnectionForPath, listTablesInMdb, deriveEstado };
+module.exports = { getConnection, getConnectionForPath, listTablesInMdb, deriveEstado, MDB_SAFE_COLUMNS };

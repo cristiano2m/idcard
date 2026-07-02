@@ -1,7 +1,8 @@
 const { listAvailableMdbFiles, getActiveConnectionInfo, setActivePath, getSearchDir, setSearchDir, setPassword } = require('../../infrastructure/database/mdb/MdbConfigService');
-const { listTablesInMdb } = require('../../infrastructure/database/mdb/MdbQueryHelpers');
+const { listTablesInMdb, getConnection, MDB_SAFE_COLUMNS } = require('../../infrastructure/database/mdb/MdbQueryHelpers');
 const { importFromMdb } = require('../../application/use-cases/mdb/ImportFromMdb');
 const { listMdbRecords } = require('../../application/use-cases/mdb/ListMdbRecords');
+const { updateMdbRecord } = require('../../application/use-cases/mdb/UpdateMdbRecord');
 
 function getContext(req) {
   return { userId: req.user?.id, ipAddress: req.ip, userAgent: req.headers['user-agent'] };
@@ -48,9 +49,21 @@ async function importData(req, res, next) {
 
 async function records(req, res, next) {
   try {
-    const { nombre, page = 1, pageSize = 20 } = req.query;
-    const result = await listMdbRecords({ nombre, page: +page, pageSize: +pageSize });
+    const { nombre, equipo, page = 1, pageSize = 20, sortBy, sortDir } = req.query;
+    const result = await listMdbRecords({ nombre, equipo, page: +page, pageSize: +pageSize, sortBy, sortDir });
     res.json(result);
+  } catch (err) { next(err); }
+}
+
+async function listTeams(req, res, next) {
+  try {
+    const conn = await getConnection();
+    const { tableName } = await getActiveConnectionInfo();
+    const rows = await conn.query(
+      `SELECT DISTINCT TEAM_NAME FROM ${tableName} WHERE TEAM_NAME IS NOT NULL ORDER BY TEAM_NAME ASC`
+    );
+    const teams = rows.map(r => r.TEAM_NAME).filter(Boolean);
+    res.json({ teams });
   } catch (err) { next(err); }
 }
 
@@ -71,4 +84,23 @@ async function updatePassword(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { listFiles, getActive, setActive, listTables, updateSearchDir, updatePassword, importData, records };
+async function getRecord(req, res, next) {
+  try {
+    const conn = await getConnection();
+    const { tableName } = await getActiveConnectionInfo();
+    const rows = await conn.query(
+      `SELECT ${MDB_SAFE_COLUMNS} FROM ${tableName} WHERE RecordID = ${Number(req.params.recordId)}`
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json({ record: rows[0] });
+  } catch (err) { next(err); }
+}
+
+async function updateRecord(req, res, next) {
+  try {
+    const record = await updateMdbRecord(Number(req.params.recordId), req.body);
+    res.json({ record });
+  } catch (err) { next(err); }
+}
+
+module.exports = { listFiles, getActive, setActive, listTables, listTeams, updateSearchDir, updatePassword, importData, records, getRecord, updateRecord };

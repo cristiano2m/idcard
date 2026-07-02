@@ -21,7 +21,16 @@
 
     <div class="card shadow-sm mb-3">
       <div class="card-body">
-        <input type="text" class="form-control" id="f-nombre" placeholder="Buscar por nombre o apellido">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <input type="text" class="form-control" id="f-nombre" placeholder="Buscar por nombre o apellido">
+          </div>
+          <div class="col-md-6">
+            <select class="form-select" id="f-equipo">
+              <option value="">Todos los equipos</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -29,7 +38,15 @@
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead>
-            <tr><th>RecordID</th><th>Nombre</th><th>Equipo</th><th>Documento</th><th>Fecha Nac.</th><th>Estado</th></tr>
+            <tr>
+              <th class="sortable" data-col="recordId" style="cursor:pointer;user-select:none">ID <span class="sort-icon"></span></th>
+              <th class="sortable" data-col="nombre" style="cursor:pointer;user-select:none">Nombre <span class="sort-icon"></span></th>
+              <th class="sortable" data-col="equipo" style="cursor:pointer;user-select:none">Equipo <span class="sort-icon"></span></th>
+              <th class="sortable" data-col="numero" style="cursor:pointer;user-select:none">Nº <span class="sort-icon"></span></th>
+              <th class="sortable" data-col="fecha" style="cursor:pointer;user-select:none">Fecha Nac. <span class="sort-icon"></span></th>
+              <th class="sortable" data-col="estado" style="cursor:pointer;user-select:none">Estado <span class="sort-icon"></span></th>
+              <th>Acciones</th>
+            </tr>
           </thead>
           <tbody id="mdb-table-body"></tbody>
         </table>
@@ -39,6 +56,48 @@
         <div>
           <button class="btn btn-sm btn-outline-secondary" id="btn-prev">Anterior</button>
           <button class="btn btn-sm btn-outline-secondary" id="btn-next">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de edición -->
+  <div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar registro MDB <span id="edit-record-id" class="text-muted small"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-form" novalidate>
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="edit-first-name" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="edit-last-name" required>
+              </div>
+              <div class="col-8">
+                <label class="form-label">Equipo</label>
+                <input type="text" class="form-control" id="edit-team-name">
+              </div>
+              <div class="col-4">
+                <label class="form-label">Número</label>
+                <input type="number" class="form-control" id="edit-shirt" min="0">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Fecha de Nacimiento</label>
+                <input type="date" class="form-control" id="edit-dob">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-save-edit">Guardar cambios</button>
         </div>
       </div>
     </div>
