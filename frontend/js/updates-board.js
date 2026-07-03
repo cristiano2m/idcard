@@ -91,6 +91,9 @@ async function loadBoard() {
   dataImpresos    = impresos;
   renderMod();
   renderImp();
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    `Actualizado ${now.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
 }
 
 // Sort click handlers
@@ -124,8 +127,8 @@ document.getElementById('btn-refresh').addEventListener('click', () => {
 (async () => {
   await requireAuth();
   renderNavbar('updates-board');
-  // Inicializar con la fecha de hoy
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('f-fecha').value = hoy;
   try { await loadBoard(); } catch (err) { showError(err.message); }
+  setInterval(() => loadBoard().catch(() => {}), 30_000);
 })();
