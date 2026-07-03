@@ -6,6 +6,7 @@ function renderNavbar(activePage) {
     { href: '/pages/history.html', label: 'Historial', key: 'history' },
     { href: '/pages/admin-users.html', label: 'Usuarios', key: 'admin-users', roles: ['Administrador'] },
     { href: '/pages/admin-settings.html', label: 'Configuración', key: 'admin-settings', roles: ['Administrador'] },
+    { href: '/pages/license.html', label: 'Licencia', key: 'license', roles: ['Administrador'] },
   ];
 
   const navHtml = links

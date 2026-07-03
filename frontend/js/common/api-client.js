@@ -15,6 +15,10 @@ async function request(method, path, body, isFormData = false) {
     window.location.href = '/pages/login.html';
     return;
   }
+  if (res.status === 402 && !path.startsWith('/license')) {
+    window.location.href = '/pages/license.html';
+    return;
+  }
 
   let data = null;
   try { data = await res.json(); } catch {}

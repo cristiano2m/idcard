@@ -1,6 +1,10 @@
 const router = require('express').Router();
+const licenseCheck = require('../middleware/licenseCheck');
+
+router.use(licenseCheck);
 
 router.use('/auth', require('./auth.routes'));
+router.use('/license', require('./license.routes'));
 router.use('/persons', require('./person.routes'));
 router.use('/dashboard', require('./dashboard.routes'));
 router.use('/history', require('./history.routes'));
