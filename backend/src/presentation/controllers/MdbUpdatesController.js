@@ -2,18 +2,19 @@ const { getDb } = require('../../infrastructure/database/sqlite/SqliteConnection
 
 function repo() { return getDb(); }
 
-function upsertUpdate(recordId, equipo, nombre, apellido) {
+function upsertUpdate(recordId, equipo, nombre, apellido, numeroCamiseta) {
   repo().prepare(`
-    INSERT INTO mdb_updates (record_id, equipo, nombre, apellido, estado, updated_at, printed_at)
-    VALUES (?, ?, ?, ?, 'Modificado', datetime('now'), NULL)
+    INSERT INTO mdb_updates (record_id, equipo, nombre, apellido, numero_camiseta, estado, updated_at, printed_at)
+    VALUES (?, ?, ?, ?, ?, 'Modificado', datetime('now'), NULL)
     ON CONFLICT(record_id) DO UPDATE SET
-      equipo     = excluded.equipo,
-      nombre     = excluded.nombre,
-      apellido   = excluded.apellido,
-      estado     = 'Modificado',
-      updated_at = datetime('now'),
-      printed_at = NULL
-  `).run(recordId, equipo || '', nombre || '', apellido || '');
+      equipo          = excluded.equipo,
+      nombre          = excluded.nombre,
+      apellido        = excluded.apellido,
+      numero_camiseta = excluded.numero_camiseta,
+      estado          = 'Modificado',
+      updated_at      = datetime('now'),
+      printed_at      = NULL
+  `).run(recordId, equipo || '', nombre || '', apellido || '', numeroCamiseta ?? null);
 }
 
 async function list(req, res, next) {

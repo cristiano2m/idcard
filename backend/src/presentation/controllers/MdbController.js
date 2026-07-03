@@ -104,7 +104,8 @@ async function updateRecord(req, res, next) {
       Number(req.params.recordId),
       req.body.TEAM_NAME,
       req.body.FIRST_NAME,
-      req.body.LAST_NAME
+      req.body.LAST_NAME,
+      req.body.SHIRT_
     );
     res.json({ ok: true });
   } catch (err) { next(err); }

@@ -43,12 +43,13 @@ function renderMod() {
     <tr class="row-mod">
       <td>${escapeHtml(r.nombre || '')} ${escapeHtml(r.apellido || '')}</td>
       <td>${escapeHtml(r.equipo || '-')}</td>
+      <td class="text-center">${r.numero_camiseta != null ? r.numero_camiseta : '-'}</td>
       <td>${fmtDate(r.updated_at)}</td>
       <td class="text-end">
         <button class="btn btn-success btn-sm btn-impreso" data-id="${r.id}">Impreso</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="4" class="text-center text-muted py-4">Sin registros modificados</td></tr>';
+  `).join('') || '<tr><td colspan="5" class="text-center text-muted py-4">Sin registros modificados</td></tr>';
 
   document.querySelectorAll('.btn-impreso').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -75,10 +76,11 @@ function renderImp() {
     <tr>
       <td>${escapeHtml(r.nombre || '')} ${escapeHtml(r.apellido || '')}</td>
       <td>${escapeHtml(r.equipo || '-')}</td>
+      <td class="text-center">${r.numero_camiseta != null ? r.numero_camiseta : '-'}</td>
       <td class="text-muted small">${fmtDate(r.updated_at)}</td>
       <td>${fmtDate(r.printed_at)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="4" class="text-center text-muted py-4">Sin registros impresos</td></tr>';
+  `).join('') || '<tr><td colspan="5" class="text-center text-muted py-4">Sin registros impresos</td></tr>';
 
   updateSortIcons('imp');
 }
