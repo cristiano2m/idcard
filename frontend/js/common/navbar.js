@@ -2,6 +2,7 @@ function renderNavbar(activePage) {
   const links = [
     { href: '/pages/dashboard.html', label: 'Dashboard', key: 'dashboard' },
     { href: '/pages/persons-list.html', label: 'Personas', key: 'persons' },
+    { href: '/pages/updates-board.html', label: 'Actualizaciones', key: 'updates-board' },
     { href: '/pages/history.html', label: 'Historial', key: 'history' },
     { href: '/pages/admin-users.html', label: 'Usuarios', key: 'admin-users', roles: ['Administrador'] },
     { href: '/pages/admin-settings.html', label: 'Configuración', key: 'admin-settings', roles: ['Administrador'] },

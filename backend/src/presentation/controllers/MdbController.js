@@ -3,6 +3,7 @@ const { listTablesInMdb, getConnection, MDB_SAFE_COLUMNS } = require('../../infr
 const { importFromMdb } = require('../../application/use-cases/mdb/ImportFromMdb');
 const { listMdbRecords } = require('../../application/use-cases/mdb/ListMdbRecords');
 const { updateMdbRecord } = require('../../application/use-cases/mdb/UpdateMdbRecord');
+const { upsertUpdate } = require('./MdbUpdatesController');
 
 function getContext(req) {
   return { userId: req.user?.id, ipAddress: req.ip, userAgent: req.headers['user-agent'] };
@@ -98,8 +99,14 @@ async function getRecord(req, res, next) {
 
 async function updateRecord(req, res, next) {
   try {
-    const record = await updateMdbRecord(Number(req.params.recordId), req.body);
-    res.json({ record });
+    await updateMdbRecord(Number(req.params.recordId), req.body);
+    upsertUpdate(
+      Number(req.params.recordId),
+      req.body.TEAM_NAME,
+      req.body.FIRST_NAME,
+      req.body.LAST_NAME
+    );
+    res.json({ ok: true });
   } catch (err) { next(err); }
 }
 

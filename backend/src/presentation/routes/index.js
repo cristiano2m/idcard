@@ -7,5 +7,6 @@ router.use('/history', require('./history.routes'));
 router.use('/users', require('./user.routes'));
 router.use('/settings', require('./settings.routes'));
 router.use('/mdb', require('./mdb.routes'));
+router.use('/mdb-updates', require('./mdb-updates.routes'));
 
 module.exports = router;
