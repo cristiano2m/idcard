@@ -28,11 +28,6 @@ async function updateMdbRecord(recordId, data) {
   await conn.execute(
     `UPDATE ${tableName} SET ${sets.join(', ')} WHERE RecordID = ${Number(recordId)}`
   );
-
-  const rows = await conn.query(
-    `SELECT ${MDB_SAFE_COLUMNS} FROM ${tableName} WHERE RecordID = ${Number(recordId)}`
-  );
-  return rows[0] || null;
 }
 
 module.exports = { updateMdbRecord };

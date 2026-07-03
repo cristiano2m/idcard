@@ -113,7 +113,8 @@ async function saveEdit() {
 
   try {
     await apiPut(`/mdb/records/${editingRecordId}`, body);
-    // Actualizar caché con los nuevos valores
+
+    // Actualizar caché
     if (rowCache[editingRecordId]) {
       rowCache[editingRecordId].nombre         = body.FIRST_NAME;
       rowCache[editingRecordId].apellido        = body.LAST_NAME;
@@ -121,9 +122,19 @@ async function saveEdit() {
       rowCache[editingRecordId].numeroCamiseta  = body.SHIRT_;
       rowCache[editingRecordId].fechaNacimiento = body.D_O_B_ ? body.D_O_B_ + 'T00:00:00Z' : null;
     }
+
+    // Actualizar la fila en el DOM sin recargar la tabla
+    const editBtn = document.querySelector(`.btn-edit[data-id="${editingRecordId}"]`);
+    if (editBtn) {
+      const cells = editBtn.closest('tr').querySelectorAll('td');
+      cells[1].textContent = `${body.FIRST_NAME} ${body.LAST_NAME}`;
+      cells[2].textContent = body.TEAM_NAME || '-';
+      cells[3].textContent = body.SHIRT_ != null ? body.SHIRT_ : '-';
+      cells[4].textContent = body.D_O_B_ || '-';
+    }
+
     editModal.hide();
     showSuccess('Registro actualizado en el MDB');
-    await loadRecords();
   } catch (err) {
     showError('Error al guardar: ' + err.message);
   } finally {
