@@ -4,6 +4,7 @@ let sortBy = 'recordId';
 let sortDir = 'ASC';
 let editModal = null;
 let editingRecordId = null;
+const rowCache = {}; // recordId → item, evita rellamar al MDB al abrir el modal
 
 function badgeForEstado(estado) {
   const cls = estado === 'Impreso' ? 'success' : estado === 'Cancelado' ? 'danger' : 'warning';
@@ -42,6 +43,7 @@ async function loadRecords() {
   if (equipo) params.set('equipo', equipo);
 
   const { items, total, mdbPath, tableName } = await apiGet(`/mdb/records?${params.toString()}`);
+  items.forEach(r => { rowCache[r.recordId] = r; });
 
   document.getElementById('mdb-source-info').textContent = `Fuente: ${mdbPath} | Tabla: ${tableName}`;
 
@@ -71,26 +73,18 @@ async function loadRecords() {
   updateSortIcons();
 }
 
-async function openEditModal(recordId) {
+function openEditModal(recordId) {
+  const r = rowCache[recordId];
+  if (!r) { showError('Registro no encontrado en caché, recarga la página'); return; }
+
   editingRecordId = recordId;
   document.getElementById('edit-record-id').textContent = `#${recordId}`;
-  document.getElementById('edit-first-name').value = '';
-  document.getElementById('edit-last-name').value = '';
-  document.getElementById('edit-team-name').value = '';
-  document.getElementById('edit-shirt').value = '';
-  document.getElementById('edit-dob').value = '';
-
-  try {
-    const { record } = await apiGet(`/mdb/records/${recordId}`);
-    document.getElementById('edit-first-name').value = record.FIRST_NAME || '';
-    document.getElementById('edit-last-name').value = record.LAST_NAME || '';
-    document.getElementById('edit-team-name').value = record.TEAM_NAME || '';
-    document.getElementById('edit-shirt').value = record.SHIRT_ != null ? record.SHIRT_ : '';
-    document.getElementById('edit-dob').value = isoToDate(record.D_O_B_) === '1970-01-01' ? '' : isoToDate(record.D_O_B_);
-  } catch (err) {
-    showError('No se pudo cargar el registro: ' + err.message);
-    return;
-  }
+  document.getElementById('edit-first-name').value = r.nombre || '';
+  document.getElementById('edit-last-name').value  = r.apellido || '';
+  document.getElementById('edit-team-name').value  = r.equipo || '';
+  document.getElementById('edit-shirt').value      = r.numeroCamiseta != null ? r.numeroCamiseta : '';
+  const dob = isoToDate(r.fechaNacimiento);
+  document.getElementById('edit-dob').value        = (dob && dob !== '1970-01-01') ? dob : '';
 
   editModal.show();
 }
@@ -119,6 +113,14 @@ async function saveEdit() {
 
   try {
     await apiPut(`/mdb/records/${editingRecordId}`, body);
+    // Actualizar caché con los nuevos valores
+    if (rowCache[editingRecordId]) {
+      rowCache[editingRecordId].nombre         = body.FIRST_NAME;
+      rowCache[editingRecordId].apellido        = body.LAST_NAME;
+      rowCache[editingRecordId].equipo          = body.TEAM_NAME;
+      rowCache[editingRecordId].numeroCamiseta  = body.SHIRT_;
+      rowCache[editingRecordId].fechaNacimiento = body.D_O_B_ ? body.D_O_B_ + 'T00:00:00Z' : null;
+    }
     editModal.hide();
     showSuccess('Registro actualizado en el MDB');
     await loadRecords();
