@@ -8,9 +8,14 @@
   <link href="../css/theme.css" rel="stylesheet">
   <link href="../css/styles.css" rel="stylesheet">
   <style>
-    .table-modificado td { background-color: #d1f5d3; }
-    .col-panel { display: flex; flex-direction: column; }
-    .panel-header { font-size: 1.1rem; font-weight: 600; padding: .5rem 0 .75rem; }
+    .sort-th { cursor: pointer; user-select: none; white-space: nowrap; }
+    .sort-th:hover { background-color: #e9ecef; }
+    .sort-th.active { color: var(--bs-primary); }
+    .sort-icon { font-size: .75rem; opacity: .6; margin-left: 3px; }
+    .sort-th.active .sort-icon { opacity: 1; }
+    .row-mod td { background-color: #e8f8ea !important; }
+    .row-mod td:first-child { border-left: 4px solid #198754; }
+    .panel-title { font-size: 1rem; font-weight: 600; letter-spacing: .02em; }
   </style>
 </head>
 <body>
@@ -23,17 +28,22 @@
     </div>
 
     <div class="row g-3">
-      <!-- Columna MODIFICADOS -->
-      <div class="col-lg-6 col-panel">
-        <div class="panel-header text-success">
-          Modificados &nbsp;<span class="badge bg-success" id="badge-mod">0</span>
-        </div>
-        <div class="card shadow-sm flex-grow-1">
+
+      <!-- MODIFICADOS -->
+      <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-success text-white d-flex justify-content-between align-items-center py-2">
+            <span class="panel-title">✏️ Modificados</span>
+            <span class="badge bg-white text-success fs-6" id="badge-mod">0</span>
+          </div>
           <div class="table-responsive">
-            <table class="table table-sm table-hover mb-0">
+            <table class="table table-sm table-hover mb-0" id="tbl-mod">
               <thead class="table-light">
                 <tr>
-                  <th>ID</th><th>Nombre</th><th>Equipo</th><th>Modificado</th><th></th>
+                  <th class="sort-th" data-table="mod" data-col="nombre">Nombre <span class="sort-icon">⇅</span></th>
+                  <th class="sort-th" data-table="mod" data-col="equipo">Equipo <span class="sort-icon">⇅</span></th>
+                  <th class="sort-th" data-table="mod" data-col="updated_at">Modificado <span class="sort-icon">⇅</span></th>
+                  <th style="width:100px"></th>
                 </tr>
               </thead>
               <tbody id="tbody-mod"></tbody>
@@ -42,17 +52,21 @@
         </div>
       </div>
 
-      <!-- Columna IMPRESOS -->
-      <div class="col-lg-6 col-panel">
-        <div class="panel-header text-primary">
-          Impresos &nbsp;<span class="badge bg-primary" id="badge-imp">0</span>
-        </div>
-        <div class="card shadow-sm flex-grow-1">
+      <!-- IMPRESOS -->
+      <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+            <span class="panel-title">🖨️ Impresos</span>
+            <span class="badge bg-white text-primary fs-6" id="badge-imp">0</span>
+          </div>
           <div class="table-responsive">
-            <table class="table table-sm table-hover mb-0">
+            <table class="table table-sm table-hover mb-0" id="tbl-imp">
               <thead class="table-light">
                 <tr>
-                  <th>ID</th><th>Nombre</th><th>Equipo</th><th>Modificado</th><th>Impreso</th>
+                  <th class="sort-th" data-table="imp" data-col="nombre">Nombre <span class="sort-icon">⇅</span></th>
+                  <th class="sort-th" data-table="imp" data-col="equipo">Equipo <span class="sort-icon">⇅</span></th>
+                  <th class="sort-th" data-table="imp" data-col="updated_at">Modificado <span class="sort-icon">⇅</span></th>
+                  <th class="sort-th" data-table="imp" data-col="printed_at">Impreso <span class="sort-icon">⇅</span></th>
                 </tr>
               </thead>
               <tbody id="tbody-imp"></tbody>
@@ -60,6 +74,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
