@@ -84,7 +84,9 @@ function renderImp() {
 }
 
 async function loadBoard() {
-  const { modificados, impresos } = await apiGet('/mdb-updates');
+  const fecha = document.getElementById('f-fecha').value;
+  const params = fecha ? `?fecha=${fecha}` : '';
+  const { modificados, impresos } = await apiGet(`/mdb-updates${params}`);
   dataModificados = modificados;
   dataImpresos    = impresos;
   renderMod();
@@ -106,6 +108,15 @@ document.querySelectorAll('.sort-th').forEach(th => {
   });
 });
 
+document.getElementById('f-fecha').addEventListener('change', () => {
+  loadBoard().catch(err => showError(err.message));
+});
+
+document.getElementById('btn-all-dates').addEventListener('click', () => {
+  document.getElementById('f-fecha').value = '';
+  loadBoard().catch(err => showError(err.message));
+});
+
 document.getElementById('btn-refresh').addEventListener('click', () => {
   loadBoard().catch(err => showError(err.message));
 });
@@ -113,5 +124,8 @@ document.getElementById('btn-refresh').addEventListener('click', () => {
 (async () => {
   await requireAuth();
   renderNavbar('updates-board');
+  // Inicializar con la fecha de hoy
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('f-fecha').value = hoy;
   try { await loadBoard(); } catch (err) { showError(err.message); }
 })();
